@@ -1,0 +1,40 @@
+
+<!doctype html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- meta data -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+
+</head>
+
+<body>
+		<h2>登录</h2>
+		<label style="color: red" th:text="${msg}"></label>
+		<form action="login" method="post" >
+				<label>手机号</label>
+				<input type="text" name="phoneNumber"  placeholder="请输入11位手机号">
+			<br>
+				<label >密码</label>
+				<input type="password" name="password" placeholder="请输入密码">
+			<br>
+			<button type="submit">登录</button>
+			<br>
+			<p>还未有账户 ?
+					<a href="register">注册</a>
+				</p>
+			<br>
+			<p>
+				<a href="loginByText">以短信验证码登录</a>
+			</p>
+			<p>
+				<a href="changePaByText">忘记密码？</a>
+			</p>
+		</form><!--/form -->
+</body>
+	
+</html>

@@ -1,0 +1,33 @@
+
+<!doctype html>
+<html  lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- meta data -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+
+</head>
+
+<body>
+		<h2>修改密码</h2>
+		<label style="color: red" th:text="${msg}"></label>
+		<form action="changePa" method="post" >
+				<label >旧密码</label>
+				<input type="password" name="password" placeholder="请输入旧密码">
+			<br>
+			<label >新密码</label>
+			<input type="password" name="newPassword" placeholder="请输入新密码">
+			<br>
+			<button type="submit">提交</button>
+			<br>
+			<p>
+				<a href="changePaByText">以短信验证码修改</a>
+			</p>
+		</form><!--/form -->
+</body>
+	
+</html>

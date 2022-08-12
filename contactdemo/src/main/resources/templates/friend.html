@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>好友</title>
+</head>
+<body>
+<br>
+<a th:href="@{/chat}">进入群聊天</a>
+<a th:href="@{/changePa}">修改密码</a>
+<a th:href="@{/friend}">好友</a>
+<br>
+<label style="color: red" th:text="${msg}"></label>
+<br>
+<h2>好友</h2>
+<form action="selectAll" method="post">
+<select name="name">
+    <option >phoneNumber</option>
+    <option >username</option>
+    <option >studentID</option>
+</select>
+<input name="object" type="text"/>
+<button type="submit">筛选</button>
+</form>
+<table >
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>phoneNumber</th>
+        <th>name</th>
+        <th>studentID</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr  th:each="user: ${users}">
+        <td th:text="${users.indexOf(user)}"></td>
+        <td th:text="${user.phoneNumber}"></td>
+        <td>[[${user.username}]]</td>
+        <td th:text="${user.studentID}">4</td>
+    </tr>
+    </tfoot>
+</table>
+</body>
+</html>

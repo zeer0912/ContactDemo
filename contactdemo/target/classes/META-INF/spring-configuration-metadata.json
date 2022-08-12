@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "custom.jwt",
+      "type": "com.zeer.demo.util.JwtUtil",
+      "sourceType": "com.zeer.demo.util.JwtUtil"
+    }
+  ],
+  "properties": [
+    {
+      "name": "custom.jwt.header",
+      "type": "java.lang.String",
+      "sourceType": "com.zeer.demo.util.JwtUtil"
+    }
+  ],
+  "hints": []
+}

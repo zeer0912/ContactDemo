@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>聊天</title>
+    <script type="text/javascript" src="http://ajax.microsoft.com/ajax/jquery/jquery-1.4.min.js"></script>
+    <script src="http://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+</head>
+<body>
+你好，<label th:text="${session.user.getUsername()}"></label>
+<br>
+<a th:href="@{/chat}">进入群聊天</a>
+<a th:href="@{/changePa}">修改密码</a>
+<a th:href="@{/friend}">好友</a>
+<br>
+<label style="color: red" th:text="${msg}"></label>
+<h2>聊天</h2>
+
+<div>
+    <select id="onLineUser">
+        <option>--所有--</option>
+    </select>
+    <input id="text" type="text"/>
+    <input type="file" id="f">
+
+    <button onclick="send()">发送</button>
+
+</div>
+<br>
+<div>
+    <button onclick="closeWebSocket()">关闭连接</button>
+</div>
+<hr/>
+<div id="message"></div>
+<input type="text" th:value="${session.user.getUsername()}" id="fromUser" style="display: none"/>
+</body>
+
+<script type="text/javascript">
+    var webSocket;
+    var commWebSocket;
+    var fromUser=document.getElementById('fromUser').value;
+    if ("WebSocket" in window) {
+        webSocket = new WebSocket("ws://localhost:8080/chat/"+document.getElementById('fromUser').value);
+
+        //连通之后的回调事件
+        webSocket.onopen = function (fromUser) {
+            //webSocket.send( document.getElementById('username').value+"已经上线了");
+            console.log("已经连通了websocket");
+            setMessageInnerHTML("已经连通了websocket");
+        };
+
+        //接收后台服务端的消息
+        webSocket.onmessage = function (evt) {
+            var received_msg = evt.data;
+            console.log("数据已接收:" + received_msg);
+            var obj = JSON.parse(received_msg);
+            console.log("可以解析成json:" + obj.messageType);
+            //1代表上线 2代表下线 3代表在线名单 4代表普通消息
+            if (obj.messageType == 1) {
+                //把名称放入到selection当中供选择
+                var onlineName = obj.fromUser;
+                var option = "<option>" + onlineName + "</option>";
+                $("#onLineUser").append(option);
+                setMessageInnerHTML(onlineName + "上线了");
+            } else if (obj.messageType == 2) {
+                $("#onLineUser").empty();
+                var onlineName = obj.onlineUsers;
+                var offlineName = obj.fromUser;
+                var option = "<option>" + "--所有--" + "</option>";
+                for (var i = 0; i < onlineName.length; i++) {
+                    if (!(onlineName[i] == document.getElementById('fromUser').value)) {
+                        option += "<option>" + onlineName[i] + "</option>"
+                    }
+                }
+                $("#onLineUser").append(option);
+
+                setMessageInnerHTML(offlineName + "下线了");
+            } else if (obj.messageType == 3) {
+                var onlineName = obj.onlineUsers;
+                console.log("获取的在线名单" + onlineName);
+                var option = null;
+                for (var i = 0; i < onlineName.length; i++) {
+                    if (!(onlineName[i] == document.getElementById('fromUser').value)) {
+                        option += "<option>" + onlineName[i] + "</option>"
+                    }
+                }
+                $("#onLineUser").append(option);
+                console.log("获取了在线的名单" + onlineName.toString());
+            } else {
+                var tousername=obj.tousername;
+                setMessageInnerHTML(obj.time);
+                if(tousername=="所有人")
+                setMessageInnerHTML(obj.fromusername + "对" + obj.tousername + "说：" + obj.textMessage);
+                else
+                setMessageInnerHTML("【私聊】"+obj.fromusername + "对你（" + obj.tousername + "）说：" + obj.textMessage);
+                if(obj.file!="null")
+                        setMessageInnerHTML('<img width="150px" src='+obj.file+'>');
+
+                setMessageInnerHTML("\n");
+            }
+        };
+
+        //连接关闭的回调事件
+        webSocket.onclose = function () {
+            console.log("连接已关闭...");
+            setMessageInnerHTML("连接已经关闭....");
+        };
+    } else {
+        // 浏览器不支持 WebSocket
+        alert("您的浏览器不支持 WebSocket!");
+    }
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+    function closeWebSocket() {
+        //直接关闭websocket的连接
+        webSocket.close();
+    }
+
+    function send() {
+        var myDate = new Date;
+        var mon = myDate.getMonth() + 1; //获取当前月
+        var date = myDate.getDate(); //获取当前日
+        var h = myDate.getHours();//获取当前小时数(0-23)
+        var m = myDate.getMinutes();//获取当前分钟数(0-59)
+        var week = myDate.getDay();
+        var weeks = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+        console.log(mon, date, weeks[week]);
+        var selectText = $("#onLineUser").find("option:selected").text();
+        var times=(mon + "月" + date + "日" + weeks[week]+"\t"+h+"时"+m+"分");
+        var files=document.getElementById("f").files;
+        var fileReader = new FileReader();
+
+        console.log(files[0]);
+        if(files.length>0){
+            fileReader.readAsDataURL(files[0])
+        }
+        if (selectText == "--所有--") {
+            selectText = "All";
+        } else {
+            setMessageInnerHTML(times);
+            setMessageInnerHTML("【私聊】你（"+document.getElementById('fromUser').value + "）对" + selectText + "说：" + $("#text").val());
+            if(files.length==0){
+                setMessageInnerHTML("\n");
+            }
+
+        }
+        var message = {
+            "time":times,
+            "message": document.getElementById('text').value,
+            "fromUser": document.getElementById('fromUser').value,
+            "to": selectText,
+            "file":"null"
+        };
+        if(files.length>0){
+            fileReader.onload = ev => {
+               message.file=ev.target.result;
+                if(message.to!="All") {
+                    setMessageInnerHTML('<img width="150px" src='+ev.target.result+'>');
+                    setMessageInnerHTML("\n");
+                }
+                webSocket.send(JSON.stringify(message));
+
+            }
+        }else webSocket.send(JSON.stringify(message));
+        $("#text").val("");
+
+    }
+</script>
+</html>
